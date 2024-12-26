@@ -1,4 +1,3 @@
-// app/tags/[slug]/page.tsx
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,13 +6,25 @@ interface Tag {
   id: number;
   slug: string;
   name: string;
+  isLean: boolean;
   title: string;
   subtitle: string;
   metaTitle: string;
   metaDescription: string;
   description: string;
-  articlesCount: number;
+  metaKeywords: string;
+  autoLink: boolean;
+  status: string;
+  metadata: Record<string, unknown>;
   image: string | null;
+  content: string | null;
+  type: string;
+  created: string;
+  updated: string;
+  deletedAt: string | null;
+  keywords: string[];
+  imageSrc: string | null;
+  articlesCount: number;
 }
 
 interface Article {
@@ -35,7 +46,9 @@ interface Article {
   titleShort: string | null;
   subTitle: string;
   roofTitle: string;
+  redirectUrl: string | null;
   time: number;
+  lastUpdate: number | null;
   props: string[];
 }
 
@@ -70,16 +83,15 @@ async function getTagArticles(
   return res.json();
 }
 
-type Props = {
+type PageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({
   params,
-  searchParams,
-}: Props): Promise<Metadata> {
-  const resolvedParams = await Promise.resolve(params);
+}: PageProps): Promise<Metadata> {
+  const resolvedParams = await params; // Resolve the params
   const tag = await getTagData(resolvedParams.slug);
 
   return {
@@ -106,9 +118,9 @@ function formatDate(timestamp: number) {
   });
 }
 
-export default async function TagPage({ params, searchParams }: Props) {
-  const resolvedParams = await Promise.resolve(params);
-  const resolvedSearchParams = await Promise.resolve(searchParams);
+export default async function TagPage({ params, searchParams }: PageProps) {
+  const resolvedParams = await params; // Resolve params
+  const resolvedSearchParams = searchParams ? await searchParams : {}; // Resolve searchParams if provided
 
   const pageParam = resolvedSearchParams.page;
   const pageNumber = typeof pageParam === "string" ? parseInt(pageParam) : 1;
@@ -127,21 +139,18 @@ export default async function TagPage({ params, searchParams }: Props) {
         <div className="text-sm text-gray-500">
           {tag.articlesCount.toLocaleString()} articles
         </div>
-        {tag.description && (
+        {tag.description && tag.description.length > 0 && (
           <div className="mt-4 prose max-w-none">{tag.description}</div>
         )}
       </header>
 
       {/* Articles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {articles.map((article, index) => (
-          <article
-            key={`${article.id}-${article.slug}-${index}`}
-            className="flex flex-col"
-          >
+        {articles.map((article) => (
+          <article key={article.id} className="flex flex-col">
             <div className="group">
               <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg mb-4">
-                <Link href={`/article/${article.slug}`} className="block">
+                <Link href={`/article/${article.slug}`}>
                   <Image
                     src={article.image.src}
                     alt={article.image.alt || article.title}
@@ -182,7 +191,7 @@ export default async function TagPage({ params, searchParams }: Props) {
                 </Link>
               </div>
 
-              <Link href={`/article/${article.slug}`} className="block">
+              <Link href={`/article/${article.slug}`}>
                 <h2 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2 mb-2">
                   {article.title}
                 </h2>
