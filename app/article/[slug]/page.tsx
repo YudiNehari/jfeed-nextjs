@@ -255,22 +255,6 @@ export default async function ArticlePage({
         </div>
       </header>
 
-      {/* Featured Image */}
-      <div className="relative aspect-[16/9] mb-8">
-        <Image
-          src={article.image.src}
-          alt={article.image.alt}
-          fill
-          className="object-cover rounded-lg"
-          priority
-        />
-        {article.image.credit && (
-          <div className="absolute bottom-2 right-2 text-sm text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-            {article.image.credit}
-          </div>
-        )}
-      </div>
-
       {/* Article Content */}
       <div className="mt-8">
         {article.content.content.map((block, index) => (
