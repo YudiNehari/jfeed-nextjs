@@ -76,6 +76,10 @@ async function getTagArticles(
     }
   );
 
+  console.log(
+    `https://a.jfeed.com/v2/articles?tagId=${tagId}&limit=${limit}&page=${page}`
+  );
+
   if (!res.ok) {
     throw new Error("Failed to fetch articles");
   }
